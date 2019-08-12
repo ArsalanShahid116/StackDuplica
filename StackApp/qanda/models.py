@@ -14,7 +14,7 @@ class Question(models.Model):
         return self.title
 
     def get_absolute_url(self):
-        return reverse('cueeneh:question_detail', kwargs={'pk': self.id})
+        return reverse('qanda:question_detail', kwargs={'pk': self.id})
 
     def can_accept_answers(self, user):
         return user == self.user
