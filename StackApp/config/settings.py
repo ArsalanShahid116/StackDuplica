@@ -91,6 +91,11 @@ DATABASES = {
             }
 }
 
+# configure Elasticsearch 
+ES_INDEX = 'qanda' 
+ES_HOST = 'localhost'
+ES_PORT = '9200'
+
 # configuring markdownify 
 MARKDOWNIFY_STRIP = False
 MARKDOWNIFY_WHITELIST_TAGS = [

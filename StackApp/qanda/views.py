@@ -1,5 +1,4 @@
 from django.shortcuts import render
-
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http.response import HttpResponseRedirect, HttpResponseBadRequest
 from django.urls.base import reverse
@@ -10,10 +9,23 @@ from django.views.generic import (
     UpdateView,
     DayArchiveView,
     RedirectView,
+    TemplateView,
 )
 
+from .service.elasticsearch import search_for_questions
 from .forms import QuestionForm, AnswerForm, AnswerAcceptanceForm
 from .models import Question, Answer
+
+class SearchView(TemplateView):
+    template_name = 'qanda/search.html'
+
+    def get_context_data(self, **kwargs):
+        query = self.request.GET.get('q', None)
+        ctx = super().get_context_data(query=query, **kwargs)
+        if query:
+            results = search_for_questions(query)
+            ctx['hits'] = results
+        return ctx
 
 class DailyQuestionList(DayArchiveView):
     queryset = Question.objects.all()
