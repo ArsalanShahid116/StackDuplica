@@ -1,4 +1,11 @@
 from django.shortcuts import render
+from .serializer import ScrapedquestionSerializer
+from bs4 import BeautifulSoup
+import requests
+import json
+from django.http import HttpResponse
+from rest_framework import viewsets
+from .serializer import ScrapedquestionSerializer
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http.response import HttpResponseRedirect, HttpResponseBadRequest
 from django.urls.base import reverse
@@ -9,23 +16,10 @@ from django.views.generic import (
     UpdateView,
     DayArchiveView,
     RedirectView,
-    TemplateView,
 )
 
-from .service.elasticsearch import search_for_questions
 from .forms import QuestionForm, AnswerForm, AnswerAcceptanceForm
-from .models import Question, Answer
-
-class SearchView(TemplateView):
-    template_name = 'qanda/search.html'
-
-    def get_context_data(self, **kwargs):
-        query = self.request.GET.get('q', None)
-        ctx = super().get_context_data(query=query, **kwargs)
-        if query:
-            results = search_for_questions(query)
-            ctx['hits'] = results
-        return ctx
+from .models import Question, Answer, Scrapedquestion
 
 class DailyQuestionList(DayArchiveView):
     queryset = Question.objects.all()
@@ -130,4 +124,35 @@ class UpdateAnswerAcceptanceView(LoginRequiredMixin, UpdateView):
         return HttpResponseRedirect(
             redirect_to=self.object.question.get_absolute_url())
 
+def index(request):
+    return HttpResponse("Success")
+
+class QuestionAPI(viewsets.ModelViewSet):
+    queryset = Scrapedquestion.objects.all()
+    serializer_class = ScrapedquestionSerializer
+
+def latest(request):
+    try: 
+        end_page_num = 3
+        i = 1
+        while i <= end_page_num:
+            res = requests.get("https://stackoverflow.com/questions/tagged/python%2bpandas?tab=newest&page={}&pagesize=50".format(i))
+            soup = BeautifulSoup(res.text, "html.parser")
+            questions = soup.select(".question-summary")
+            for que in questions:
+                q = que.select_one('.question-hyperlink').getText()
+                vote_count = que.select_one('.vote-count-post').getText()
+                views = que.select_one('.views').attrs['title']
+                tags = [i.getText() for i in (que.select('.post-tag'))]
+                
+                question = Scrapedquestion()
+                question.question = q
+                question.vote_count = vote_count
+                question.views = views
+                question.tags = tags
+                question.save()
+            i += 1
+        return HttpResponse("Latest Data Fetched from Stack Overflow")
+    except e as Exception:
+        return HttpResponse(f"Failed {e}")
 

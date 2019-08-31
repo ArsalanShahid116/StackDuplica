@@ -31,6 +31,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'rest_framework',
     'qanda',
     'crispy_forms',
     'markdownify',
@@ -90,11 +91,6 @@ DATABASES = {
                 'PORT': '5432',
             }
 }
-
-# configure Elasticsearch 
-ES_INDEX = 'qanda' 
-ES_HOST = 'localhost'
-ES_PORT = '9200'
 
 # configuring markdownify 
 MARKDOWNIFY_STRIP = False

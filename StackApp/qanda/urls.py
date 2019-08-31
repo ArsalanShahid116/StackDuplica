@@ -1,5 +1,10 @@
-from django.urls.conf import path
+from django.urls.conf import path, include
 from qanda import views
+from .views import QuestionAPI, latest
+from rest_framework import routers
+
+router = routers.DefaultRouter()
+router.register("questions", QuestionAPI)
 
 app_name = 'qanda'
 
@@ -10,7 +15,8 @@ urlpatterns = [
             path('question/<int:pk>/accept', views.UpdateAnswerAcceptanceView.as_view(),name='update_answer_acceptance'),
             path('daily/<int:year>/<int:month>/<int:day>/', views.DailyQuestionList.as_view(), name='daily_questions'),
             path('', views.TodaysQuestionList.as_view(), name='index'),
-	    path('q/search', views.SearchView.as_view(), name='question_search'),
+            path('', include(router.urls)),
+            path('scrap', latest, name="latest"),
             ]
 
 

@@ -1,6 +1,5 @@
-Django==2.2.4
+Django==2.2.3
 pytz==2019.1
 sqlparse==0.3.0
-django-markdownify==0.8.0
-django-crispy-forms==1.7.2
-elasticsearch==6.00
+django-markdownify=0.8.0
+django-crispy-forms=1.7.2

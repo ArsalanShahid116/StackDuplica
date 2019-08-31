@@ -2,6 +2,14 @@ from django.conf import settings
 from django.db import models
 from django.urls.base import reverse
 
+class Scrapedquestion(models.Model):
+    question = models.CharField(max_length=300)
+    vote_count = models.IntegerField(default=0)
+    views = models.CharField(max_length=50)
+    tags = models.CharField(max_length=250)
+
+    def __str__(self):
+        return self.question
 
 class Question(models.Model):
     title = models.CharField(max_length=140)
@@ -18,17 +26,7 @@ class Question(models.Model):
 
     def can_accept_answers(self, user):
         return user == self.user
-    
-    def as_elasticsearch_dict(self):
-        return {
-            '_id': self.id,
-            '_type': 'doc',
-            'text': '{}\n{}'.format(self.title, self.question),
-            'question_body': self.question,
-            'title': self.title,
-            'id': self.id,
-            'created': self.created,
-        }
+
 
 class Answer(models.Model):
     answer = models.TextField()
